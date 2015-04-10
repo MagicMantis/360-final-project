@@ -1,3 +1,10 @@
+/* Written by Marshall Clyburn
+ *
+ * robot.h: contains function headers and structs
+ * for interacting with the robot on a model level.
+ * These functions should be called independently
+ * from the UDCP protocol. */
+
 #ifndef ROBOT_H
 #define ROBOT_H
 
