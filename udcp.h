@@ -7,8 +7,23 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+typedef struct Response_t {
+	unsigned int request_id;
+	unsigned int num_of_msgs;
+	unsigned int sequence_num;
+	char request[1000];
+} Response;
+
+typedef struct Request_t {
+	unsigned int robot_id;
+	unsigned int request_id;
+	char request[16];
+} Request;
+
+extern int message_id;
+
 //reliably send a message to the server
-int udcpSend(int sock, struct addrinfo info);
+int udcpSend(int sock, struct addrinfo info, void *buffer, size_t size, int id);
 
 //reliably receive a message from the server
-int udcpRecv(int sock);
+int udcpRecv(int sock, void *buffer, size_t size, int id);
