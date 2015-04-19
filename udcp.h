@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-// connects to a server, returns 0 if successful and -1 if unsuccessful
-// TODO: needs parameters
-int connect();
+//reliably send a message to the server
+int udcpSend(int sock, struct addrinfo info);
+
+//reliably receive a message from the server
+int udcpRecv(int sock);

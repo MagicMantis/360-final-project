@@ -10,7 +10,6 @@
 
 typedef struct GPS_DATA_t {
     double x, y, z;          // Cartesion coordinates
-    double pitch, yaw, roll; // Angular positioning
     double q1, q2, q3, q4;   // Quaternion
 } GPS_DATA;
 

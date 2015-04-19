@@ -14,15 +14,14 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#define SERVER_ADDR "130.127.192.62"
-
 int main(int argc, char *argv[]) {
 
 	struct sockaddr_in robotAddr;	/* address of the server managing the robot */
 	struct hostent *thehost; 		/* hostent used for gethostbyname() */
 
 	int sock;	/* TCP sockets for communicating with the robot server */
-	int outPort, inPort; /* outPort is port for http server, in port is for UDCP server bind */
+	int outPort; /* outPort is port for http server */
+	int inPort = 8080; /* in port is for UDCP server bind */
 	int bytes = 0;
 	char *robotAddrName, *robotAddrPath, *robotID;
 
@@ -32,6 +31,8 @@ int main(int argc, char *argv[]) {
 	//get parameters from command line arguments
 	robotID = argv[1];
 	robotAddrName = argv[2];
+
+
 }
 
 /* Form and send the http request coorespondign to rqNum (request number) */
