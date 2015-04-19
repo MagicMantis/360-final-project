@@ -11,3 +11,14 @@ Robot Information
 ID: `0theory`
 
 Camera ID: `19`
+
+To-Do List
+----------
+- Make server accept request from client
+- Make server accept response from robot
+- Make server send response information to client
+- Implement UDCP
+- Make client generate commands
+- Make client send requests to the server
+- Make client receive responses from server
+- Implement robot functions
