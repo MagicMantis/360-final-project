@@ -24,14 +24,17 @@ int main(int argc, char *argv[]) {
 	int sock;	/* TCP sockets for communicating with the robot server */
 	int outPort, inPort; /* outPort is port for http server, in port is for UDCP server bind */
 	int bytes = 0;
-	char *robotAddrName, *robotAddrPath, *robotID;
+	char *robotAddrName, *robotAddrPath, *robotID, *imageID;
 
 	//check for usage errors
 	if (argc != 4) failProgram("Usage error: ./server <robot_id> <hostname> <port>\n");
 
 	//get parameters from command line arguments
-	robotID = argv[1];
-	robotAddrName = argv[2];
+	inPort = atoi(argv[1]);
+	robotID = argv[2];
+	imageID = argv[3];
+
+	return 0;
 }
 
 /* Form and send the http request coorespondign to rqNum (request number) */
