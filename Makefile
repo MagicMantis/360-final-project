@@ -1,6 +1,7 @@
 CC = gcc
 CCFLAGS = -g
 
+server.o: utility.h
 utility.o: utility.c
 	$(CC) $(CCFLAGS) -c $^
 

@@ -4,6 +4,7 @@
  * forward them to the robot server as HTTP requests, and to return
  * the results to the client via UDCP. */
 
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,10 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include "utility.h"
+
 #define SERVER_ADDR "130.127.192.62"
+char *robotAddrName, *robotAddrPath, *robotID, *imageID;
 
 int main(int argc, char *argv[]) {
 
@@ -22,9 +26,8 @@ int main(int argc, char *argv[]) {
 	struct hostent *thehost; 		/* hostent used for gethostbyname() */
 
 	int sock;	/* TCP sockets for communicating with the robot server */
-	int outPort, inPort; /* outPort is port for http server, in port is for UDCP server bind */
+	int inPort; /* outPort is port for http server, in port is for UDCP server bind */
 	int bytes = 0;
-	char *robotAddrName, *robotAddrPath, *robotID, *imageID;
 
 	//check for usage errors
 	if (argc != 4) failProgram("Usage error: ./server <robot_id> <hostname> <port>\n");
@@ -38,11 +41,13 @@ int main(int argc, char *argv[]) {
 }
 
 /* Form and send the http request coorespondign to rqNum (request number) */
-void sendRobotRequest(int rqNum) {
+void sendRobotRequest(char* robotID, int rqNum) {
 
 	//allocate space for robot path string
 	robotAddrPath = (char *) malloc(100);
 
+	unsigned int outPort;
+	
 	//format variables based on request type
 	switch (rqNum) {
 		case 0: //get image
@@ -63,11 +68,11 @@ void sendRobotRequest(int rqNum) {
 			break;
 		case 4: //move
 			outPort = 8082;
-			sprintf(robotAddrPath, "/twist?id=%s&lx=%d", robotID, /*TODO speed var*/port);
+			sprintf(robotAddrPath, "/twist?id=%s&lx=%d", robotID, /*TODO speed var*/outPort);
 			break;
 		case 5: //turn
 			outPort = 8082;
-			sprintf(robotAddrPath, "/twist?id=%s&az=%d", robotID, /*TODO degrees var*/port);
+			sprintf(robotAddrPath, "/twist?id=%s&az=%d", robotID, /*TODO degrees var*/outPort);
 			break;
 		case 6: //stop
 			outPort = 8082;
@@ -77,23 +82,32 @@ void sendRobotRequest(int rqNum) {
 	}
 
 	//set up accepted addresses
-	memset(&robotAddr, 0, sizeof(robotAddr)); /* Zero out structure */
-	servAddr.sin_family = AF_INET; /* Internet address family */
-	servAddr.sin_addr.s_addr = inet_addr(robotAddrName); /* Address of robot server */
-	servAddr.sin_port = htons(port); /* Port of desired service */
+	struct sockaddr_in robotAddr;
+	memset(&robotAddr, 0, sizeof(struct sockaddr)); /* Zero out structure */
+	robotAddr.sin_family = AF_INET; /* Internet address family */
+	robotAddr.sin_addr.s_addr = inet_addr(robotAddrName); /* Address of robot server */
+	robotAddr.sin_port = htons(outPort); /* Port of desired service */
 
 	//get the host name
-	if (servAddr.sin_addr.s_addr == (in_addr_t) -1) {
-		thehost = gethostbyname(servername);
-		servAddr.sin_addr.s_addr = *((unsigned long *) thehost->h_addr_list[0]);
+	struct addrinfo* results;
+	char port_str[6];
+	sprintf(port_str, "%d", outPort);
+	if (robotAddr.sin_addr.s_addr == (in_addr_t) -1) {
+	    struct addrinfo criteria;
+	    memset(&criteria, 0, sizeof(struct addrinfo));
+	    criteria.ai_family = AF_INET;
+	    criteria.ai_socktype = SOCK_STREAM;
+	    criteria.ai_protocol = IPPROTO_TCP;
+	    getaddrinfo(robotAddrName, port_str, &criteria, &results);
 	}
 
 	//create socket
+	int sock;
 	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) 
 		failProgram("Failed to create socket. \n");
 
 	//establish connection
-	if (connect(sock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0) {
+	if (connect(sock, (struct sockaddr*) &(results->ai_addr), sizeof(struct sockaddr)) < 0)
 		failProgram("Failed to connect to server. \n");
 
 	//form http request
@@ -103,6 +117,7 @@ void sendRobotRequest(int rqNum) {
 
 	//send http request
 	int totalBytes = 0;
+	int bytes;
 	do {
 		if ((bytes = send(sock, &request[totalBytes], strlen(request)-totalBytes, 0)) == -1) 
 			failProgram("Send failed. \n");
