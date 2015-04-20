@@ -3,7 +3,7 @@
 int message_id = 0;
 
 //reliably send a message to the server
-int udcpSend(int sock, struct addrinfo info, void *buffer, size_t size, int id) {
+int udcpSend() {
 
 
 
