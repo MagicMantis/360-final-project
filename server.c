@@ -5,6 +5,7 @@
  * the results to the client via UDCP. */
 
 #include <arpa/inet.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -155,10 +156,27 @@ void sendRobotRequest(char* robotID, int rqNum) {
 		totalBytes += bytes;
 	} while (totalBytes < strlen(request));
 
-	//TODO process response
+	const unsigned int buffer_length = 1024;
+	unsigned char* recv_buffer = (unsigned char*) malloc(sizeof(unsigned char) * buffer_length);
+	totalBytes = 0;
+	do {
+	    bytes = recv(sock, recv_buffer + totalBytes, buffer_length, 0);
+	    if(bytes == -1)
+	    {
+		// TODO: Notify client of failure?
+		printf("Failed to receive a response from the robot.\n");
+		return;
+	    }
+	    totalBytes += bytes;
+	} while(totalBytes < buffer_length);
 
+	// look for beginning of data
+	const char* httpContent = strstr((char*) recv_buffer, "\r\n\r\n");
+
+	// TODO: send data back to client
 
 	//cleanups
+	free(recv_buffer);
 	free(request);
 	free(robotAddrPath);
 }
