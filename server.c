@@ -56,16 +56,7 @@ int main(int argc, char *argv[]) {
 			printf("problem with receiving\n");
 		}
 //			printf("Got a message\n");
-			unsigned int ID;
-			memset(&ID, 0, 32);
-			memcpy(&ID, buff, 32);
-			char robotID[sizeof(robotID)];
-			memcpy(robotID, buff+32, sizeof(robotID));
-			char command[11];
-			memcpy(command, buff+32+sizeof(robotID), 11);
 //			printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
-
-			
 	}
 
 	return 0;
