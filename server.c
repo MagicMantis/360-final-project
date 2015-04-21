@@ -51,8 +51,8 @@ int main(int argc, char *argv[]) {
 	unsigned int cliAddrLen;
 	cliAddrLen = sizeof(clntAddr);
 
-	for(;;){
-		if((messageLength = recvfrom(sock, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0){
+	for(;;) {
+		if((messageLength = recvfrom(sock, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0) {
 			printf("problem with receiving\n");
 		}
 //			printf("Got a message\n");
