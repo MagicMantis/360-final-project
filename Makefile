@@ -1,7 +1,9 @@
 CC = gcc
 CCFLAGS = -g
 
-all: server client
+BINS = server client
+
+all: $(BINS)
 
 client: client.o utility.o udcp.o
 
@@ -16,4 +18,4 @@ utility.o: utility.c
 
 .PHONY:
 clean:
-	rm -f *.o
+	rm -f *.o $(BINS) 
