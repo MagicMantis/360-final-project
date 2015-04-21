@@ -35,8 +35,8 @@ int main(int argc, char *argv[]) {
 	int sock;
 	struct sockaddr_in servAddr;
 	struct sockaddr_in clntAddr;
-	unsigned int messageLength;
-	
+	int messageLength;
+
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Error with setting up socket\n");
 
@@ -51,21 +51,12 @@ int main(int argc, char *argv[]) {
 	unsigned int cliAddrLen;
 	cliAddrLen = sizeof(clntAddr);
 
-	for(;;){	
-		if((messageLength = recvfrom(sock, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0){
+	for(;;) {
+		if((messageLength = recvfrom(sock, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0) {
 			printf("problem with receiving\n");
 		}
 //			printf("Got a message\n");
-			unsigned int ID;
-			memset(&ID, 0, 32);
-			memcpy(&ID, buff, 32);
-			char robotID[sizeof(robotID)];
-			memcpy(robotID, buff+32, sizeof(robotID));
-			char command[11];
-			memcpy(command, buff+32+sizeof(robotID), 11);
 //			printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
-
-			
 	}
 
 	return 0;
@@ -78,7 +69,7 @@ void sendRobotRequest(char* robotID, int rqNum) {
 	char *robotAddrPath = (char *) malloc(100);
 
 	unsigned int outPort;
-	
+
 	//format variables based on request type
 
 	switch (rqNum) {
@@ -135,7 +126,7 @@ void sendRobotRequest(char* robotID, int rqNum) {
 
 	//create socket
 	int sock;
-	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) 
+	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 		failProgram("Failed to create socket. \n");
 
 	//establish connection
@@ -144,14 +135,14 @@ void sendRobotRequest(char* robotID, int rqNum) {
 
 	//form http request
 	char *request = (char *) malloc(1000);
-	sprintf(request, "GET https://%s:%d HTTP/1.1\r\nHost: %s\r\n\r\n", 
+	sprintf(request, "GET https://%s:%d HTTP/1.1\r\nHost: %s\r\n\r\n",
 		robotAddrName, outPort, robotAddrName);
 
 	//send http request
 	int totalBytes = 0;
 	int bytes;
 	do {
-		if ((bytes = send(sock, &request[totalBytes], strlen(request)-totalBytes, 0)) == -1) 
+		if ((bytes = send(sock, &request[totalBytes], strlen(request)-totalBytes, 0)) == -1)
 			failProgram("Send failed. \n");
 		totalBytes += bytes;
 	} while (totalBytes < strlen(request));
