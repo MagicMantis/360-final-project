@@ -5,8 +5,6 @@ int message_id = 0;
 //reliably send a message to the server
 int udcpSend(int sock, struct addrinfo info, void *buffer, size_t size, unsigned int id) {
 
-
-
 }
 
 //reliably receive a message from the server

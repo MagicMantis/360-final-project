@@ -23,14 +23,49 @@ char *robotAddrName, *robotID, *imageID;
 int main(int argc, char *argv[]) {
 
 	//check for usage errors
-	if (argc != 4) failProgram("Usage error: ./server <robot_id> <hostname> <port>\n");
+	if (argc != 5) failProgram("Usage error: ./server <server port> <hostname> <robot ID> <image ID>\n");
 
-	//get parameters from command line arguments
+	int port = atoi(argv[1]);
+	char *robotName = argv[2];
+	char *robotID = argv[3];
+	char *imageID = argv[4];
+	char buff[500];
 
-	int inPort; /* in port is for UDCP server bind */
-	inPort = atoi(argv[1]);
-	robotID = argv[2];
-	imageID = argv[3];
+	int sock;
+	struct sockaddr_in servAddr;
+	struct sockaddr_in clntAddr;
+	unsigned int messageLength;
+	
+	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+		printf("Error with setting up socket\n");
+
+	memset(&servAddr, 0, sizeof(servAddr));
+	servAddr.sin_family = AF_INET;
+	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servAddr.sin_port = htons(port);
+
+	if(bind(sock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
+		printf("Couldn't bind to socket\n");
+
+	unsigned int cliAddrLen;
+	cliAddrLen = sizeof(clntAddr);
+
+	for(;;){	
+		if((messageLength = recvfrom(sock, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0){
+			printf("problem with receiving\n");
+		}
+//			printf("Got a message\n");
+			unsigned int ID;
+			memset(&ID, 0, 32);
+			memcpy(&ID, buff, 32);
+			char robotID[sizeof(robotID)];
+			memcpy(robotID, buff+32, sizeof(robotID));
+			char command[11];
+			memcpy(command, buff+32+sizeof(robotID), 11);
+//			printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
+
+			
+	}
 
 	return 0;
 }
