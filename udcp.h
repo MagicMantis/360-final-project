@@ -11,7 +11,8 @@ typedef struct Response_t {
 	unsigned int request_id;
 	unsigned int num_of_msgs;
 	unsigned int sequence_num;
-	char request[1000];
+	char data[1000];
+	size_t data_size;
 } Response;
 
 typedef struct Request_t {
