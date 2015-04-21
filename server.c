@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 	int sock;
 	struct sockaddr_in servAddr;
 	struct sockaddr_in clntAddr;
-	unsigned int messageLength;
+	int messageLength;
 	
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Error with setting up socket\n");
