@@ -17,3 +17,9 @@ To-Do List
 - Implement UDCP
 - Make client generate commands
 - Implement robot functions
+- Get Images from the server
+- Add in timeouts for the client
+- check in middle parameters with the one it receives in the message
+- Deal with message ID's
+- Write images to a file in client when they are received\
+- 
