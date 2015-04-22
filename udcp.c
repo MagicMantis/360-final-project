@@ -44,14 +44,3 @@ int udcpRecv(int sock, void *buffer, size_t size, unsigned int id) {
 	memcpy(buffer, unpack, (size_t) loc);
 }
 
-
-/*	   ssize_t bytes = sendto(sock, (void *) &guess, 4, 0,
-	      serverAddr->ai_addr, serverAddr->ai_addrlen);
-	   if (bytes < 0) die("send failed.\n"); 
-	   else if (bytes != 4) die("sent wrong number of bytes.\n");
-
-	   //recieve response from server	   
-	   bytes = recvfrom(sock, (int *) &code, 4, 0, 
-	      (struct sockaddr *) &fromAddr, &fromAddrLen);
-	   if (bytes < 0) die("recieve failed");
-	   else if (bytes != 4) die("recieved wrong # of bytes.\n");*/

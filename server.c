@@ -181,9 +181,9 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 
         //process response
 
-        char buff[904];
-        memset(buff, 0, 904);
-        int check = recv(sockTCP, buff, 904, 0);
+        char buff[988];
+        memset(buff, 0, 988);
+        int check = recv(sockTCP, buff, 988, 0);
         printf("Buff = %s\n", buff);
         printf("Bytes read = %d\n", check);
 
@@ -204,12 +204,16 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
         int one = 1;
         memcpy(message+32, &one, 32);
         memcpy(message+64, &one, 32);
-        memcpy(message+96, response, 904);
+        memcpy(message+96, response, 988);
 
 	// TODO: send data back to client
+
+	udcpSend(sockTCP, info, (void *) response, 1000, ID);
+
 
 	//cleanups
 	free(recv_buffer);
 	free(request);
 	free(robotAddrPath);
+	close(sockTCP);
 }
