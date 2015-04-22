@@ -4,10 +4,7 @@
  * functions used by the client to establish a connection
  * and to control the robot */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
+#include "utility.h"
 
 typedef struct Response_t {
 	unsigned int request_id;
@@ -26,7 +23,7 @@ typedef struct Request_t {
 extern int message_id;
 
 //reliably send a message to the server
-int udcpSend();
+int udcpSend(int sock, struct addrinfo info, void *buffer, size_t size, unsigned int id);
 
 //reliably receive a message from the server
-int udcpRecv(int sock, void *buffer, size_t size, int id);
+int udcpRecv(int sock, void *buffer, size_t size, unsigned int id);

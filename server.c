@@ -4,20 +4,8 @@
  * forward them to the robot server as HTTP requests, and to return
  * the results to the client via UDCP. */
 
-#include <arpa/inet.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <signal.h>
-
-#include "udcp.h"
 #include "utility.h"
+#include "udcp.h"
 
 #define SERVER_ADDR "130.127.192.62"
 char *robotAddrName, *robotID, *imageID;
@@ -207,6 +195,9 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
 	char *response_data = strstr(buff, "\r\n\r\n");
 	response_data+=4;
 
+	udcpSend(sockUDP, clntAddr, (void *) response_data, content_length, ID);
+
+/*
 	char* message = (char*) malloc(buffer_size * sizeof(char));
 	memset(message, 0, buffer_size);
 	memcpy(message, &ID, 4);
@@ -217,6 +208,8 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
 
 	int sentLen = sendto(sockUDP, message, 1000, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
 	printf("sentLen = %d\n", sentLen);
+
+*/
 	
 	//cleanups
 	free(message);

@@ -1,9 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "udcp.h"
 #include "utility.h"
-#include <string.h>
-#include <netdb.h>
+#include "udcp.h"
 
 int main(int argc, char *argv[]) {
 	
