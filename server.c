@@ -25,7 +25,7 @@ void sendRobotRequest(char *robotID, int agNum, int speed, char *ImageID);
 
 struct sockaddr_in servAddr;
 struct sockaddr_in clntAddr;
-int sock;
+int sockUDP;
 unsigned int messageLength;
 unsigned int cliAddrLen;
 unsigned int ID;
@@ -41,12 +41,7 @@ int main(int argc, char *argv[]) {
 	char *imageID = argv[4];
 	char buff[500];
 
-	int sock;
-	struct sockaddr_in servAddr;
-	struct sockaddr_in clntAddr;
-	int messageLength;
-
-	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+	if((sockUDP = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Error with setting up socket\n");
 
 	memset(&servAddr, 0, sizeof(servAddr));
@@ -54,14 +49,13 @@ int main(int argc, char *argv[]) {
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servAddr.sin_port = htons(port);
 
-	if(bind(sock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
+	if(bind(sockUDP, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
 		printf("Couldn't bind to socket\n");
 
-	unsigned int cliAddrLen;
 	cliAddrLen = sizeof(clntAddr);
 
 	for(;;) {
-		if((messageLength = recvfrom(sock, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0) {
+		if((messageLength = recvfrom(sockUDP, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0) {
 			printf("problem with receiving\n");
 		}
 		printf("Message Length = %d\n", messageLength);
@@ -168,12 +162,12 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 //      printf("got past weird shit\n");
 
         //create socket
-        int sock;
-        if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+        int sockTCP;
+        if ((sockTCP= socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
                 printf("Failed to create socket. \n");
 
         //establish connection
-        if(connect(sock, (struct sockaddr*) &robotAddr, sizeof(robotAddr)) < 0)
+        if(connect(sockTCP, (struct sockaddr*) &robotAddr, sizeof(robotAddr)) < 0)
                 printf("Failed to connect to server. \n");
 
 	//form http request
@@ -183,13 +177,13 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 
         //send http request
         int bytes;
-        bytes = send(sock, request, strlen(request), 0);
+        bytes = send(sockTCP, request, strlen(request), 0);
 
         //process response
 
         char buff[904];
         memset(buff, 0, 904);
-        int check = recv(sock, buff, 904, 0);
+        int check = recv(sockTCP, buff, 904, 0);
         printf("Buff = %s\n", buff);
         printf("Bytes read = %d\n", check);
 
