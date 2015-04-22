@@ -35,7 +35,7 @@ unsigned int ID;
 int main(int argc, char *argv[]) {
 
 	//check for usage errors
-	if (argc != 5) printf("Usage error: ./server <server port> <hostname> <robot ID> <image ID>\n");
+	if (argc != 5) failProgram("Usage error: ./server <server port> <hostname> <robot ID> <image ID>\n");
 
 	int port = atoi(argv[1]);
 	robotName = argv[2];
@@ -175,7 +175,7 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
 
 	//form http request
 	char *request = (char *) malloc(1000);
-	sprintf(request, "GET http://%s:%d/%s HTTP/1.1\r\nHost: myrequester/1.1\r\n\r\n",
+	sprintf(request, "GET http://%s:%d%s HTTP/1.1\r\nHost: castara.clemson.edu\r\n\r\n",
 		robotName, outPort, robotAddrPath);
 
 //	printf("%s\n", robotAddrPath);
