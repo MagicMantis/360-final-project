@@ -186,9 +186,14 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
 	bytes = send(sockTCP, request, strlen(request), 0);
 	printf("TCP bytes sent = %d\n", bytes);
      	
-	char buff[988];
-	memset(buff, 0, 988);
-	int check = recv(sockTCP, buff, 988, 0);
+	int buf_size = 100*1000;
+	char buff[buf_size];
+	memset(buff, 0, buf_size);
+	int totalBytes = 0, bytes = 1;
+	while (bytes > 0) {
+		bytes = recv(sockTCP, buff+totalBytes, 200, 0);
+		totalBytes += bytes;
+	}
 	printf("Buff = %s\n", buff);
 	printf("Bytes read = %d\n", check);
 
