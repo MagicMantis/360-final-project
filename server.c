@@ -21,11 +21,8 @@
 #define SERVER_ADDR "130.127.192.62"
 char *robotAddrName, *robotID, *imageID;
 
-<<<<<<< HEAD
 char *robotName;
 
-=======
->>>>>>> 1407d9f15195d71af1c0b4f09d5c62b59b5798f6
 void sendRobotRequest(char *robotID, int agNum, int speed, char *ImageID);
 
 struct sockaddr_in servAddr;
@@ -59,7 +56,6 @@ int main(int argc, char *argv[]) {
 
 	cliAddrLen = sizeof(clntAddr);
 
-<<<<<<< HEAD
 	for(;;){	
 		messageLength = recvfrom(sockUDP, buff, sizeof(buff), 0, (struct sockaddr *) &clntAddr, &cliAddrLen);
 		if(messageLength == -1){
@@ -68,12 +64,13 @@ int main(int argc, char *argv[]) {
 		}
 		printf("Message Length = %d\n", messageLength);
 		printf("Got a message\n");
-		memset(&ID, 0, 32);
-		memcpy(&ID, buff, 32);
-		char roboID[sizeof(robotID)];
-		memcpy(roboID, buff+32, sizeof(robotID));
+		memset(&ID, 0, 4);
+		memcpy(&ID, buff, 4);
+		char roboID[strlen(robotID)];
+		memcpy(roboID, buff+4, strlen(robotID));
 		char command[11];
-		memcpy(command, buff+32+sizeof(robotID), 11);
+		memset(command, 0, 11);
+		memcpy(command, buff+4+strlen(roboID)+1, 11);
 		printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
 		
 		char *order = strtok(command, " ");
@@ -107,66 +104,13 @@ int main(int argc, char *argv[]) {
 		}
 //		printf("resetting buff\n");
 		memset(buff, 0, 500);		
-=======
-	for(;;) {
-		if((messageLength = recvfrom(sockUDP, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0) {
-			printf("problem with receiving\n");
-		}
-		printf("Message Length = %d\n", messageLength);
-                printf("Got a message\n");
-                memset(&ID, 0, 32);
-                memcpy(&ID, buff, 32);
-                char roboID[strlen(robotID)];
-                memcpy(roboID, buff+32, strlen(robotID));
-                char command[11];
-                memcpy(command, buff+32+strlen(robotID), 11);
-                printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
-
-                char *order = strtok(command, " ");
-                if(strcmp(order,"GET") == 0){
-                        order = strtok(NULL," ");
-                        if(strcmp(order,"IMAGE") == 0){
-                                sendRobotRequest(roboID, 0, 0, imageID);
-                        }
-                        else if(strcmp(order,"GPS") == 0){
-                                sendRobotRequest(roboID, 1, 0, imageID);
-                        }
-                        else if(strcmp(order,"DGPS") == 0){
-                                sendRobotRequest(roboID, 2, 0, imageID);
-                        }
-                        else if(strcmp(order,"LASERS") == 0){
-                                sendRobotRequest(roboID, 3, 0, imageID);
-                        }
-                }
-                else if(strcmp(order,"MOVE") == 0){
-                        order = strtok(NULL," ");
-                        int speed = atoi(order);
-                        sendRobotRequest(roboID, 4, speed, imageID);
-                }
-                else if(strcmp(order,"TURN") == 0){
-                        order = strtok(NULL," ");
-                        int speed = atoi(order);
-                        sendRobotRequest(roboID, 5, speed, imageID);
-                }
-                else{
-                        sendRobotRequest(roboID, 6, 0, imageID);
-                }
-//              printf("resetting buff\n");
-                memset(buff, 0, 500);
-
->>>>>>> 1407d9f15195d71af1c0b4f09d5c62b59b5798f6
 	}
 //	printf("About to exit\n");
 	exit(0);
 }
 
 /* Form and send the http request coorespondign to rqNum (request number) */
-<<<<<<< HEAD
 void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
-=======
-void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
->>>>>>> 1407d9f15195d71af1c0b4f09d5c62b59b5798f6
-
 	//allocate space for robot path string
 	char *robotAddrPath = (char *) malloc(100);
 
@@ -206,9 +150,6 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 		default: printf("Recieved bad request number. Exiting program...\n");
 	}
 
-<<<<<<< HEAD
-//	printf("Got past switch statement\n");
-
 	struct hostent *server;
 
 	server = gethostbyname(robotName);
@@ -243,101 +184,29 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 	//send http request
 	int bytes;
 	bytes = send(sockTCP, request, strlen(request), 0);
-=======
-        struct hostent *server;
-
-        server = gethostbyname(robotName);
-
-        //set up accepted addresses
-        struct sockaddr_in robotAddr;
-        memset(&robotAddr, 0, sizeof(struct sockaddr));
-        robotAddr.sin_family = AF_INET;
-        robotAddr.sin_addr.s_addr = *((unsigned long *)server->h_addr_list[0]);
-        robotAddr.sin_port = htons(outPort);
-
-
-//      printf("got past weird shit\n");
-
-        //create socket
-        int sockTCP;
-        if ((sockTCP= socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-                printf("Failed to create socket. \n");
-
-        //establish connection
-        if(connect(sockTCP, (struct sockaddr*) &robotAddr, sizeof(robotAddr)) < 0)
-                printf("Failed to connect to server. \n");
-
-	//form http request
-	char *request = (char *) malloc(1000);
-	sprintf(request, "GET https://%s:%d/%s HTTP/1.1\r\nHost: \r\n\r\n",
-		robotName, outPort, robotAddrPath);
-
-        //send http request
-        int bytes;
-        bytes = send(sockTCP, request, strlen(request), 0);
-
-        //process response
-
-        char buff[904];
-        memset(buff, 0, 904);
-        int check = recv(sockTCP, buff, 904, 0);
-        printf("Buff = %s\n", buff);
-        printf("Bytes read = %d\n", check);
-
-        char *response = strtok(buff, "\r\n");
-        response = strtok(NULL,"\r\n");
-        response = strtok(NULL, "\r\n");
-        response = strtok(NULL,"\r\n");
-        response = strtok(NULL, "\r\n");
-        response = strtok(NULL,"\r\n");
-        response = strtok(NULL,"\r\n");
-        response = strtok(NULL, "\r\n");
-
-        //printf("Response = %s\n", response);
-
-        char message[1000];
-        memset(message, 0, 1000);
-        memcpy(message, &ID, 32);
-        int one = 1;
-        memcpy(message+32, &one, 32);
-        memcpy(message+64, &one, 32);
-        memcpy(message+96, response, 904);
-
-	// TODO: send data back to client
->>>>>>> 1407d9f15195d71af1c0b4f09d5c62b59b5798f6
-
-	//process response
-	
-	char buff[904];
-	memset(buff, 0, 904);
-	int check = recv(sockTCP, buff, 904, 0);
+	printf("TCP bytes sent = %d\n", bytes);
+     	
+	char buff[988];
+	memset(buff, 0, 988);
+	int check = recv(sockTCP, buff, 988, 0);
 	printf("Buff = %s\n", buff);
 	printf("Bytes read = %d\n", check);
 
-	char *response = strtok(buff, "\r\n");
-	response = strtok(NULL,"\r\n");
-        response = strtok(NULL, "\r\n");
-        response = strtok(NULL,"\r\n");
-        response = strtok(NULL, "\r\n");
-        response = strtok(NULL,"\r\n");
-        response = strtok(NULL,"\r\n");
-        response = strtok(NULL, "\r\n");
-
-	//printf("Response = %s\n", response);
+	char *response = strstr(buff, "\r\n\r\n");
+	response+=4;
 
 	char message[1000];
 	memset(message, 0, 1000);
-	memcpy(message, &ID, 32);
-	int one = 1;
-	memcpy(message+32, &one, 32);
-	memcpy(message+64, &one, 32);
-	memcpy(message+96, response, 904);
+	memcpy(message, &ID, 4);
+	unsigned int one = 1;
+	memcpy(message+4, &one, 4);
+	memcpy(message+8, &one, 4);
+	memcpy(message+12, response, 988);
 
 	int sentLen = sendto(sockUDP, message, 1000, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
 	printf("sentLen = %d\n", sentLen);
 	
 	//cleanups
-	free(recv_buffer);
 	free(request);
 	free(robotAddrPath);
 //	printf("Finishing sendRobotCommand. Returning\n");
