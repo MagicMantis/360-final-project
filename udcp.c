@@ -19,6 +19,7 @@ int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsig
 
 	int i = 0, processed = 0;
 	while (i < msgs_needed) {
+//	    printf("anything\n");
 		//format udcp header
 		temp->request_id = id;
 		temp->num_of_msgs = msgs_needed;
