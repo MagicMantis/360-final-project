@@ -164,7 +164,7 @@ void sendRobotRequest(char* robotID, int request_no, int speed, char *imageID) {
 
 	//form http request
 	char *request = (char *) malloc(1000);
-	sprintf(request, "GET %s HTTP/1.1\r\nHost: castara.clemson.edu\r\n\r\n",
+	sprintf(request, "GET %s HTTP/1.1\r\nHost: castara.clemson.edu\r\nConnection: close\r\n\r\n",
 		robotAddrPath);
 
 //	printf("%s\n", robotAddrPath);

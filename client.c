@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 	tempID[sizeof(robotID)+1] = '\0';
 	memcpy(requestPoint, tempID, strlen(robotID));
 	requestPoint += sizeof(robotID);
-	memcpy(requestPoint, stop, strlen(stop));
+	memcpy(requestPoint, image, strlen(image));
 	printf("command = %s\n", requestPoint);
 	
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
@@ -62,25 +62,17 @@ int main(int argc, char *argv[]) {
 //	memcpy(&test, request, 32);
 //	printf("ID sent = %d\n", test);
 
-	char response[1000];
-	fromSize = sizeof(fromAddr);
-	int check = recvfrom(sock, response, 1000, 0, (struct sockaddr *) &fromAddr, &fromSize);
-	char body[988];
-	printf("check = %d\n", check);
-	unsigned int recvID;
-	memset(&recvID, 0, 4);
-	memcpy(&recvID, response, 4);
-	unsigned int tot;
-	memset(&tot, 0, 4);
-	char *responsePoint = response;
-	memcpy(&tot, responsePoint+4, 4);
-	unsigned int num;
-	memset(&num, 0, 4);
-	memcpy(&num, response+8, 4);
-	memcpy(body, response+12, 988);
-	printf("ID = %d\ntotal = %d\nnum = %d\n", recvID, tot, num);
-	printf("check = %d\n", check);
-	printf("%s\n", body);
-	
+	const unsigned int buffer_size = 100 * 1000;
+	char* buff = (char*) malloc(buffer_size * sizeof(char));
+	int response_size = udcpRecv(sock, buff, messageNum);
+
+	printf("response: %d\n", response_size);
+
+	FILE *fp;
+	fp = fopen("file.jpeg", "w");
+	fwrite(buff, 1, response_size, fp);
+	close(fp);
+	free(buff);
+
 	exit(0);
 }

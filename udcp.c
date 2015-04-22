@@ -6,11 +6,11 @@ int message_id = 0;
 int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsigned int id) {
 
 	Response *temp = malloc(sizeof(Response));
-	char *data = (char *) data;
+	char *data = (char *) buffer;
 	int msgs_needed = 0;
 	int temp_size = size;
 	int dataSection = 0;
-	while (size > 0) {
+	while (temp_size > 0) {
 		dataSection = temp_size;
 		if (dataSection > 988) dataSection = 988;
 		temp_size -= dataSection;
@@ -30,7 +30,7 @@ int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsig
 		size -= dataSection;
 
 		//move data into struct
-		memcpy(&(temp->data), &data[processed], dataSection);
+		memcpy(temp->data, &data[processed], dataSection);
 		processed += dataSection;
 
 		//send data
@@ -41,7 +41,7 @@ int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsig
 }
 
 //reliably receive a message from the server
-int udcpRecv(int sock, void *buffer, size_t size, unsigned int id) {
+int udcpRecv(int sock, void *buffer, unsigned int id) {
 
 	Response *temp = malloc(sizeof(Response));
 	Response *msgs = (Response *) buffer;
@@ -51,7 +51,8 @@ int udcpRecv(int sock, void *buffer, size_t size, unsigned int id) {
 
 	int bytes = -1;
 	while (bytes < 0) {
-		bytes = recvfrom(sock, temp, size, 0, &fromAddr, &fromAddrLen);
+		bytes = recvfrom(sock, temp, 1000, 0, &fromAddr, &fromAddrLen);
+		temp->data_size = bytes - (sizeof(unsigned int) * 3);
 	}
 
 	unsigned int recv_id = temp->request_id;
@@ -60,7 +61,7 @@ int udcpRecv(int sock, void *buffer, size_t size, unsigned int id) {
 	memcpy(&msgs[seq], temp, sizeof(Response));
 	int i = 1;
 	while (i < num_msgs) {
-		bytes = recvfrom(sock, temp, size, 0, &fromAddr, &fromAddrLen);
+		bytes = recvfrom(sock, temp, 1000, 0, &fromAddr, &fromAddrLen);
 		if (bytes > 0) {
 			if (temp->request_id != id) continue;
 			temp->data_size = bytes - (sizeof(unsigned int) * 3);
@@ -79,6 +80,6 @@ int udcpRecv(int sock, void *buffer, size_t size, unsigned int id) {
 	free(unpack);
 	free(temp);
 
-	return 0;
+	return loc;
 }
 

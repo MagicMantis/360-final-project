@@ -1,13 +1,13 @@
 CC = gcc
-CCFLAGS=-Wall -g
+CFLAGS=-Wall -g
 
 all: client server
 
 client: client.o utility.o udcp.o
-	$(CC) $(CCFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 server: server.o utility.o udcp.o
-	$(CC) $(CCFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 client.o: utility.h
 server.o: utility.h

@@ -10,7 +10,7 @@ typedef struct Response_t {
 	unsigned int request_id;
 	unsigned int num_of_msgs;
 	unsigned int sequence_num;
-	char data[1000];
+	char data[988];
 	size_t data_size;
 } Response;
 
@@ -26,4 +26,4 @@ extern int message_id;
 int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsigned int id);
 
 //reliably receive a message from the server
-int udcpRecv(int sock, void *buffer, size_t size, unsigned int id);
+int udcpRecv(int sock, void *buffer, unsigned int id);
