@@ -208,8 +208,6 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 
 	// TODO: send data back to client
 
-	udcpSend(sockTCP, info, (void *) response, 1000, ID);
-
 	int sentLen = sendto(sockUDP, message, 1000, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
         printf("sentLen = %d\n", sentLen);
 
