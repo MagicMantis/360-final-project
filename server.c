@@ -210,6 +210,8 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 
 	udcpSend(sockTCP, info, (void *) response, 1000, ID);
 
+	int sentLen = sendto(sockUDP, message, 1000, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
+        printf("sentLen = %d\n", sentLen);
 
 	//cleanups
 	free(recv_buffer);
