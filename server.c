@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include "udcp.h"
 #include "utility.h"
 
 #define SERVER_ADDR "130.127.192.62"
