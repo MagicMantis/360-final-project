@@ -23,6 +23,13 @@ char *robotAddrName, *robotID, *imageID;
 
 void sendRobotRequest(char *robotID, int agNum, int speed, char *ImageID);
 
+struct sockaddr_in servAddr;
+struct sockaddr_in clntAddr;
+int sock;
+unsigned int messageLength;
+unsigned int cliAddrLen;
+unsigned int ID;
+
 int main(int argc, char *argv[]) {
 
 	//check for usage errors
@@ -146,65 +153,64 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 		default: failProgram("Recieved bad request number. Exiting program...\n");
 	}
 
-	//set up accepted addresses
-	struct sockaddr_in robotAddr;
-	memset(&robotAddr, 0, sizeof(struct sockaddr)); /* Zero out structure */
-	robotAddr.sin_family = AF_INET; /* Internet address family */
-	robotAddr.sin_addr.s_addr = inet_addr(robotAddrName); /* Address of robot server */
-	robotAddr.sin_port = htons(outPort); /* Port of desired service */
+        struct hostent *server;
 
-	//get the host name
-	struct addrinfo* results;
-	char port_str[6];
-	sprintf(port_str, "%d", outPort);
-	if (robotAddr.sin_addr.s_addr == (in_addr_t) -1) {
-	    struct addrinfo criteria;
-	    memset(&criteria, 0, sizeof(struct addrinfo));
-	    criteria.ai_family = AF_INET;
-	    criteria.ai_socktype = SOCK_STREAM;
-	    criteria.ai_protocol = IPPROTO_TCP;
-	    getaddrinfo(robotAddrName, port_str, &criteria, &results);
-	}
+        server = gethostbyname(robotName);
 
-	//create socket
-	int sock;
-	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
-		failProgram("Failed to create socket. \n");
+        //set up accepted addresses
+        struct sockaddr_in robotAddr;
+        memset(&robotAddr, 0, sizeof(struct sockaddr));
+        robotAddr.sin_family = AF_INET;
+        robotAddr.sin_addr.s_addr = *((unsigned long *)server->h_addr_list[0]);
+        robotAddr.sin_port = htons(outPort);
 
-	//establish connection
-	if (connect(sock, (struct sockaddr*) &(results->ai_addr), sizeof(struct sockaddr)) < 0)
-		failProgram("Failed to connect to server. \n");
+
+//      printf("got past weird shit\n");
+
+        //create socket
+        int sock;
+        if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+                printf("Failed to create socket. \n");
+
+        //establish connection
+        if(connect(sock, (struct sockaddr*) &robotAddr, sizeof(robotAddr)) < 0)
+                printf("Failed to connect to server. \n");
 
 	//form http request
 	char *request = (char *) malloc(1000);
-	sprintf(request, "GET https://%s:%d HTTP/1.1\r\nHost: %s\r\n\r\n",
-		robotAddrName, outPort, robotAddrName);
+	sprintf(request, "GET https://%s:%d/%s HTTP/1.1\r\nHost: \r\n\r\n",
+		robotName, outPort, robotAddrPath);
 
-	//send http request
-	int totalBytes = 0;
-	int bytes;
-	do {
-		if ((bytes = send(sock, &request[totalBytes], strlen(request)-totalBytes, 0)) == -1)
-			failProgram("Send failed. \n");
-		totalBytes += bytes;
-	} while (totalBytes < strlen(request));
+        //send http request
+        int bytes;
+        bytes = send(sock, request, strlen(request), 0);
 
-	const unsigned int buffer_length = 1024;
-	unsigned char* recv_buffer = (unsigned char*) malloc(sizeof(unsigned char) * buffer_length);
-	totalBytes = 0;
-	do {
-	    bytes = recv(sock, recv_buffer + totalBytes, buffer_length, 0);
-	    if(bytes == -1)
-	    {
-		// TODO: Notify client of failure?
-		printf("Failed to receive a response from the robot.\n");
-		return;
-	    }
-	    totalBytes += bytes;
-	} while(totalBytes < buffer_length);
+        //process response
 
-	// look for beginning of data
-	const char* httpContent = strstr((char*) recv_buffer, "\r\n\r\n");
+        char buff[904];
+        memset(buff, 0, 904);
+        int check = recv(sock, buff, 904, 0);
+        printf("Buff = %s\n", buff);
+        printf("Bytes read = %d\n", check);
+
+        char *response = strtok(buff, "\r\n");
+        response = strtok(NULL,"\r\n");
+        response = strtok(NULL, "\r\n");
+        response = strtok(NULL,"\r\n");
+        response = strtok(NULL, "\r\n");
+        response = strtok(NULL,"\r\n");
+        response = strtok(NULL,"\r\n");
+        response = strtok(NULL, "\r\n");
+
+        //printf("Response = %s\n", response);
+
+        char message[1000];
+        memset(message, 0, 1000);
+        memcpy(message, &ID, 32);
+        int one = 1;
+        memcpy(message+32, &one, 32);
+        memcpy(message+64, &one, 32);
+        memcpy(message+96, response, 904);
 
 	// TODO: send data back to client
 
