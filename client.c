@@ -39,11 +39,11 @@ int main(int argc, char *argv[]) {
 	char *requestPoint = request;
 	requestPoint+=4;
 	char tempID[sizeof(argv[3])];
-	memcpy(tempID, robotID, sizeof(robotID));
+	memcpy(tempID, robotID, strlen(robotID));
 	tempID[sizeof(robotID)+1] = '\0';
-	memcpy(requestPoint, tempID, sizeof(robotID));
+	memcpy(requestPoint, tempID, strlen(robotID));
 	requestPoint += sizeof(robotID);
-	memcpy(requestPoint, stop, sizeof(stop));
+	memcpy(requestPoint, image, strlen(image));
 	printf("command = %s\n", requestPoint);
 	
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
