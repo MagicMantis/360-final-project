@@ -3,7 +3,7 @@
 int message_id = 0;
 
 //reliably send a message to the server
-int udcpSend(int sock, struct addrinfo info, void *buffer, size_t size, unsigned int id) {
+int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsigned int id) {
 
 	Response *temp = malloc(sizeof(Response));
 	char *data = (char *) data;
@@ -34,7 +34,7 @@ int udcpSend(int sock, struct addrinfo info, void *buffer, size_t size, unsigned
 		processed += dataSection;
 
 		//send data
-		int sentLen = sendto(sock, temp, 12+dataSection, 0, info.ai_addr, info.ai_addrlen);
+		int sentLen = sendto(sock, temp, 12+dataSection, 0, (struct sockaddr*) &info, sizeof(info));
 		i++;
 	}
 
@@ -52,11 +52,11 @@ int udcpRecv(int sock, void *buffer, size_t size, unsigned int id) {
 	int bytes = -1;
 	while (bytes < 0) {
 		bytes = recvfrom(sock, temp, size, 0, &fromAddr, &fromAddrLen);
-		unsigned int recv_id = temp->request_id;
-		unsigned int num_msgs = temp->num_of_msgs;
-		unsigned int seq = temp->sequence_num;
 	}
 
+	unsigned int recv_id = temp->request_id;
+	unsigned int num_msgs = temp->num_of_msgs;
+	unsigned int seq = temp->sequence_num;
 	memcpy(&msgs[seq], temp, sizeof(Response));
 	int i = 1;
 	while (i < num_msgs) {

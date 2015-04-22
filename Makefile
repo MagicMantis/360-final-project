@@ -3,10 +3,10 @@ CCFLAGS=-Wall -g
 
 all: client server
 
-client: client.o utility.o
+client: client.o utility.o udcp.o
 	$(CC) $(CCFLAGS) $^ -o $@
 
-server: server.o utility.o
+server: server.o utility.o udcp.o
 	$(CC) $(CCFLAGS) $^ -o $@
 
 client.o: utility.h

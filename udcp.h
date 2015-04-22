@@ -23,7 +23,7 @@ typedef struct Request_t {
 extern int message_id;
 
 //reliably send a message to the server
-int udcpSend(int sock, struct addrinfo info, void *buffer, size_t size, unsigned int id);
+int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsigned int id);
 
 //reliably receive a message from the server
 int udcpRecv(int sock, void *buffer, size_t size, unsigned int id);
