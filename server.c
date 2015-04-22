@@ -175,8 +175,8 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
 
 	//form http request
 	char *request = (char *) malloc(1000);
-	sprintf(request, "GET http://%s:%d%s HTTP/1.1\r\nHost: castara.clemson.edu\r\n\r\n",
-		robotName, outPort, robotAddrPath);
+	sprintf(request, "GET %s HTTP/1.1\r\nHost: castara.clemson.edu\r\n\r\n",
+		robotAddrPath);
 
 //	printf("%s\n", robotAddrPath);
 	printf("%s\n", request);
@@ -189,13 +189,14 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
 	int buf_size = 100*1000;
 	char buff[buf_size];
 	memset(buff, 0, buf_size);
-	int totalBytes = 0, bytes = 1;
-	while (bytes > 0) {
-		bytes = recv(sockTCP, buff+totalBytes, 200, 0);
-		totalBytes += bytes;
+	int totalBytes = 0;
+	int check = 1;
+	while (check > 0) {
+		check = recv(sockTCP, buff+totalBytes, 200, 0);
+		totalBytes += check;
 	}
 	printf("Buff = %s\n", buff);
-	printf("Bytes read = %d\n", check);
+	printf("Bytes read = %d\n", totalBytes);
 
 	char *response = strstr(buff, "\r\n\r\n");
 	response+=4;
