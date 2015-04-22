@@ -63,5 +63,13 @@ int main(int argc, char *argv[]) {
 	memcpy(&test, request, 32);
 	printf("ID sent = %d\n", test);
 
+        char response[1000];
+        fromSize = sizeof(fromAddr);
+        int check = recvfrom(sock, response, 1000, 0, (struct sockaddr *) &fromAddr, &fromSize);
+        char body[904];
+        memcpy(body, response+96, 904);
+        printf("check = %d\n", check);
+        printf("%s\n", body);
+
 	exit(0);
 }
