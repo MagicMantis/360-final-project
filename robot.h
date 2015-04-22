@@ -13,6 +13,8 @@ typedef struct GPS_DATA_t {
     double q1, q2, q3, q4;   // Quaternion
 } GPS_DATA;
 
+void actionLoop(int length, int num_of_sides);
+
 //request an image from the server
 void getImage();
 
