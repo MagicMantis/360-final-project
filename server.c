@@ -21,6 +21,8 @@
 #define SERVER_ADDR "130.127.192.62"
 char *robotAddrName, *robotID, *imageID;
 
+void sendRobotRequest(char *robotID, int agNum, int speed, char *ImageID);
+
 int main(int argc, char *argv[]) {
 
 	//check for usage errors
@@ -55,15 +57,55 @@ int main(int argc, char *argv[]) {
 		if((messageLength = recvfrom(sock, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0) {
 			printf("problem with receiving\n");
 		}
-//			printf("Got a message\n");
-//			printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
+		printf("Message Length = %d\n", messageLength);
+                printf("Got a message\n");
+                memset(&ID, 0, 32);
+                memcpy(&ID, buff, 32);
+                char roboID[sizeof(robotID)];
+                memcpy(roboID, buff+32, sizeof(robotID));
+                char command[11];
+                memcpy(command, buff+32+sizeof(robotID), 11);
+                printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
+
+                char *order = strtok(command, " ");
+                if(strcmp(order,"GET") == 0){
+                        order = strtok(NULL," ");
+                        if(strcmp(order,"IMAGE") == 0){
+                                sendRobotRequest(roboID, 0, 0, imageID);
+                        }
+                        else if(strcmp(order,"GPS") == 0){
+                                sendRobotRequest(roboID, 1, 0, imageID);
+                        }
+                        else if(strcmp(order,"DGPS") == 0){
+                                sendRobotRequest(roboID, 2, 0, imageID);
+                        }
+                        else if(strcmp(order,"LASERS") == 0){
+                                sendRobotRequest(roboID, 3, 0, imageID);
+                        }
+                }
+                else if(strcmp(order,"MOVE") == 0){
+                        order = strtok(NULL," ");
+                        int speed = atoi(order);
+                        sendRobotRequest(roboID, 4, speed, imageID);
+                }
+                else if(strcmp(order,"TURN") == 0){
+                        order = strtok(NULL," ");
+                        int speed = atoi(order);
+                        sendRobotRequest(roboID, 5, speed, imageID);
+                }
+                else{
+                        sendRobotRequest(roboID, 6, 0, imageID);
+                }
+//              printf("resetting buff\n");
+                memset(buff, 0, 500);
+
 	}
 
 	return 0;
 }
 
 /* Form and send the http request coorespondign to rqNum (request number) */
-void sendRobotRequest(char* robotID, int rqNum) {
+void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 
 	//allocate space for robot path string
 	char *robotAddrPath = (char *) malloc(100);
@@ -75,7 +117,7 @@ void sendRobotRequest(char* robotID, int rqNum) {
 	switch (rqNum) {
 		case 0: //get image
 			outPort = 8081;
-			sprintf(robotAddrPath, "/snapshot?topic=/%s/image?width=600?height=500", robotID);
+			sprintf(robotAddrPath, "/snapshot?topic=/robot_%s/image?width=600?height=500", imageID);
 			break;
 		case 1: //get GPS
 			outPort = 8082;
