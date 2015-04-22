@@ -62,10 +62,10 @@ int main(int argc, char *argv[]) {
                 printf("Got a message\n");
                 memset(&ID, 0, 32);
                 memcpy(&ID, buff, 32);
-                char roboID[sizeof(robotID)];
-                memcpy(roboID, buff+32, sizeof(robotID));
+                char roboID[strlen(robotID)];
+                memcpy(roboID, buff+32, strlen(robotID));
                 char command[11];
-                memcpy(command, buff+32+sizeof(robotID), 11);
+                memcpy(command, buff+32+strlen(robotID), 11);
                 printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
 
                 char *order = strtok(command, " ");
@@ -134,11 +134,11 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 			break;
 		case 4: //move
 			outPort = 8082;
-			sprintf(robotAddrPath, "/twist?id=%s&lx=%d", robotID, /*TODO speed var*/outPort);
+			sprintf(robotAddrPath, "/twist?id=%s&lx=%d", robotID, speed);
 			break;
 		case 5: //turn
 			outPort = 8082;
-			sprintf(robotAddrPath, "/twist?id=%s&az=%d", robotID, /*TODO degrees var*/outPort);
+			sprintf(robotAddrPath, "/twist?id=%s&az=%d", robotID, speed);
 			break;
 		case 6: //stop
 			outPort = 8082;
