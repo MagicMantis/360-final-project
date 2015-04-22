@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
 	printf("server = %s\nport = %d\nrobotID = %s\nlength = %d\nN = %d\n", server, port, robotID, length, N);
 
 	char request[500];
+	memset(request, 0, 500);
 	memcpy(request, &messageNum, 32);
 	char *requestPoint = request;
 	requestPoint+=32;
@@ -42,7 +43,8 @@ int main(int argc, char *argv[]) {
 	tempID[sizeof(robotID)+1] = '\0';
 	memcpy(requestPoint, tempID, sizeof(robotID));
 	requestPoint += sizeof(robotID);
-	memcpy(requestPoint, move, sizeof(move));
+	memcpy(requestPoint, stop, sizeof(stop));
+	printf("command = %s\n", requestPoint);
 	
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Can't set up socket\n");
@@ -57,19 +59,20 @@ int main(int argc, char *argv[]) {
 		servAddr.sin_addr.s_addr = *((unsigned long *) thehost->h_addr_list[0]);
 	}
 
-	sendto(sock, request, 500, 0, (struct sockaddr *) &servAddr, sizeof(servAddr));
+	int sentLen = sendto(sock, request, 500, 0, (struct sockaddr *) &servAddr, sizeof(servAddr));
+	printf("SentLen = %d\n", sentLen);
 
-	unsigned int test;
-	memcpy(&test, request, 32);
-	printf("ID sent = %d\n", test);
+//	unsigned int test;
+//	memcpy(&test, request, 32);
+//	printf("ID sent = %d\n", test);
 
-        char response[1000];
-        fromSize = sizeof(fromAddr);
-        int check = recvfrom(sock, response, 1000, 0, (struct sockaddr *) &fromAddr, &fromSize);
-        char body[904];
-        memcpy(body, response+96, 904);
-        printf("check = %d\n", check);
-        printf("%s\n", body);
-
+	char response[1000];
+	fromSize = sizeof(fromAddr);
+	int check = recvfrom(sock, response, 1000, 0, (struct sockaddr *) &fromAddr, &fromSize);
+	char body[904];
+	memcpy(body, response+96, 904);
+	printf("check = %d\n", check);
+	printf("%s\n", body);
+	
 	exit(0);
 }
