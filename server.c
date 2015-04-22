@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include "udcp.h"
 #include "utility.h"
 
 #define SERVER_ADDR "130.127.192.62"
@@ -175,8 +176,8 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
 
 	//form http request
 	char *request = (char *) malloc(1000);
-	sprintf(request, "GET http://%s:%d%s HTTP/1.1\r\nHost: castara.clemson.edu\r\n\r\n",
-		robotName, outPort, robotAddrPath);
+	sprintf(request, "GET %s HTTP/1.1\r\nHost: castara.clemson.edu\r\n\r\n",
+		robotAddrPath);
 
 //	printf("%s\n", robotAddrPath);
 	printf("%s\n", request);
@@ -186,32 +187,40 @@ void sendRobotRequest(char* robotID, int rqNum, int speed, char *imageID) {
 	bytes = send(sockTCP, request, strlen(request), 0);
 	printf("TCP bytes sent = %d\n", bytes);
      	
-	int buf_size = 100*1000;
-	char buff[buf_size];
-	memset(buff, 0, buf_size);
-	int totalBytes = 0, bytes = 1;
-	while (bytes > 0) {
-		bytes = recv(sockTCP, buff+totalBytes, 200, 0);
-		totalBytes += bytes;
-	}
+	// use a large buffer for possibly receiving an image
+	const unsigned int buffer_size = 100 * 1000;
+	char* buff = (char*) malloc(buffer_size * sizeof(char));
+	int totalBytes = 0;
+	do {
+	    bytes = recv(sockTCP, buff + totalBytes, 200, 0);
+	    if(bytes == -1) {
+		printf("An error occurred while receiving response from robot.\n");
+		// TODO: notify client of failure?
+	    }
+	    totalBytes += bytes;
+	} while(bytes > 0);
+	buff[totalBytes] = 0; // null termination for strings
+	
 	printf("Buff = %s\n", buff);
-	printf("Bytes read = %d\n", check);
+	printf("Bytes read = %d\n", totalBytes);
 
-	char *response = strstr(buff, "\r\n\r\n");
-	response+=4;
+	char *response_data = strstr(buff, "\r\n\r\n");
+	response_data+=4;
 
-	char message[1000];
-	memset(message, 0, 1000);
+	char* message = (char*) malloc(buffer_size * sizeof(char));
+	memset(message, 0, buffer_size);
 	memcpy(message, &ID, 4);
 	unsigned int one = 1;
 	memcpy(message+4, &one, 4);
 	memcpy(message+8, &one, 4);
-	memcpy(message+12, response, 988);
+	memcpy(message+12, response_data, 988);
 
 	int sentLen = sendto(sockUDP, message, 1000, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
 	printf("sentLen = %d\n", sentLen);
 	
 	//cleanups
+	free(message);
+	free(buff);
 	free(request);
 	free(robotAddrPath);
 //	printf("Finishing sendRobotCommand. Returning\n");
