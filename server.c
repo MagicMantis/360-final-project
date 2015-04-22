@@ -5,6 +5,7 @@
  * the results to the client via UDCP. */
 
 #include <arpa/inet.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +21,15 @@
 #define SERVER_ADDR "130.127.192.62"
 char *robotAddrName, *robotID, *imageID;
 
+void sendRobotRequest(char *robotID, int agNum, int speed, char *ImageID);
+
+struct sockaddr_in servAddr;
+struct sockaddr_in clntAddr;
+int sockUDP;
+unsigned int messageLength;
+unsigned int cliAddrLen;
+unsigned int ID;
+
 int main(int argc, char *argv[]) {
 
 	//check for usage errors
@@ -31,12 +41,7 @@ int main(int argc, char *argv[]) {
 	char *imageID = argv[4];
 	char buff[500];
 
-	int sock;
-	struct sockaddr_in servAddr;
-	struct sockaddr_in clntAddr;
-	unsigned int messageLength;
-	
-	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
+	if((sockUDP = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Error with setting up socket\n");
 
 	memset(&servAddr, 0, sizeof(servAddr));
@@ -44,46 +49,76 @@ int main(int argc, char *argv[]) {
 	servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servAddr.sin_port = htons(port);
 
-	if(bind(sock, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
+	if(bind(sockUDP, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
 		printf("Couldn't bind to socket\n");
 
-	unsigned int cliAddrLen;
 	cliAddrLen = sizeof(clntAddr);
 
-	for(;;){	
-		if((messageLength = recvfrom(sock, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0){
+	for(;;) {
+		if((messageLength = recvfrom(sockUDP, &buff, 500, 0, (struct sockaddr *) &clntAddr, &cliAddrLen)) < 0) {
 			printf("problem with receiving\n");
 		}
-//			printf("Got a message\n");
-			unsigned int ID;
-			memset(&ID, 0, 32);
-			memcpy(&ID, buff, 32);
-			char robotID[sizeof(robotID)];
-			memcpy(robotID, buff+32, sizeof(robotID));
-			char command[11];
-			memcpy(command, buff+32+sizeof(robotID), 11);
-//			printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
+		printf("Message Length = %d\n", messageLength);
+                printf("Got a message\n");
+                memset(&ID, 0, 32);
+                memcpy(&ID, buff, 32);
+                char roboID[sizeof(robotID)];
+                memcpy(roboID, buff+32, sizeof(robotID));
+                char command[11];
+                memcpy(command, buff+32+sizeof(robotID), 11);
+                printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
 
-			
+                char *order = strtok(command, " ");
+                if(strcmp(order,"GET") == 0){
+                        order = strtok(NULL," ");
+                        if(strcmp(order,"IMAGE") == 0){
+                                sendRobotRequest(roboID, 0, 0, imageID);
+                        }
+                        else if(strcmp(order,"GPS") == 0){
+                                sendRobotRequest(roboID, 1, 0, imageID);
+                        }
+                        else if(strcmp(order,"DGPS") == 0){
+                                sendRobotRequest(roboID, 2, 0, imageID);
+                        }
+                        else if(strcmp(order,"LASERS") == 0){
+                                sendRobotRequest(roboID, 3, 0, imageID);
+                        }
+                }
+                else if(strcmp(order,"MOVE") == 0){
+                        order = strtok(NULL," ");
+                        int speed = atoi(order);
+                        sendRobotRequest(roboID, 4, speed, imageID);
+                }
+                else if(strcmp(order,"TURN") == 0){
+                        order = strtok(NULL," ");
+                        int speed = atoi(order);
+                        sendRobotRequest(roboID, 5, speed, imageID);
+                }
+                else{
+                        sendRobotRequest(roboID, 6, 0, imageID);
+                }
+//              printf("resetting buff\n");
+                memset(buff, 0, 500);
+
 	}
 
 	return 0;
 }
 
 /* Form and send the http request coorespondign to rqNum (request number) */
-void sendRobotRequest(char* robotID, int rqNum) {
+void sendRobotRequest(char* robotID, int rqNum, int speed, int imageID) {
 
 	//allocate space for robot path string
 	char *robotAddrPath = (char *) malloc(100);
 
 	unsigned int outPort;
-	
+
 	//format variables based on request type
 
 	switch (rqNum) {
 		case 0: //get image
 			outPort = 8081;
-			sprintf(robotAddrPath, "/snapshot?topic=/%s/image?width=600?height=500", robotID);
+			sprintf(robotAddrPath, "/snapshot?topic=/robot_%s/image?width=600?height=500", imageID);
 			break;
 		case 1: //get GPS
 			outPort = 8082;
@@ -112,53 +147,69 @@ void sendRobotRequest(char* robotID, int rqNum) {
 		default: failProgram("Recieved bad request number. Exiting program...\n");
 	}
 
-	//set up accepted addresses
-	struct sockaddr_in robotAddr;
-	memset(&robotAddr, 0, sizeof(struct sockaddr)); /* Zero out structure */
-	robotAddr.sin_family = AF_INET; /* Internet address family */
-	robotAddr.sin_addr.s_addr = inet_addr(robotAddrName); /* Address of robot server */
-	robotAddr.sin_port = htons(outPort); /* Port of desired service */
+        struct hostent *server;
 
-	//get the host name
-	struct addrinfo* results;
-	char port_str[6];
-	sprintf(port_str, "%d", outPort);
-	if (robotAddr.sin_addr.s_addr == (in_addr_t) -1) {
-	    struct addrinfo criteria;
-	    memset(&criteria, 0, sizeof(struct addrinfo));
-	    criteria.ai_family = AF_INET;
-	    criteria.ai_socktype = SOCK_STREAM;
-	    criteria.ai_protocol = IPPROTO_TCP;
-	    getaddrinfo(robotAddrName, port_str, &criteria, &results);
-	}
+        server = gethostbyname(robotName);
 
-	//create socket
-	int sock;
-	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) 
-		failProgram("Failed to create socket. \n");
+        //set up accepted addresses
+        struct sockaddr_in robotAddr;
+        memset(&robotAddr, 0, sizeof(struct sockaddr));
+        robotAddr.sin_family = AF_INET;
+        robotAddr.sin_addr.s_addr = *((unsigned long *)server->h_addr_list[0]);
+        robotAddr.sin_port = htons(outPort);
 
-	//establish connection
-	if (connect(sock, (struct sockaddr*) &(results->ai_addr), sizeof(struct sockaddr)) < 0)
-		failProgram("Failed to connect to server. \n");
+
+//      printf("got past weird shit\n");
+
+        //create socket
+        int sockTCP;
+        if ((sockTCP= socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+                printf("Failed to create socket. \n");
+
+        //establish connection
+        if(connect(sockTCP, (struct sockaddr*) &robotAddr, sizeof(robotAddr)) < 0)
+                printf("Failed to connect to server. \n");
 
 	//form http request
 	char *request = (char *) malloc(1000);
-	sprintf(request, "GET https://%s:%d HTTP/1.1\r\nHost: %s\r\n\r\n", 
-		robotAddrName, outPort, robotAddrName);
+	sprintf(request, "GET https://%s:%d/%s HTTP/1.1\r\nHost: \r\n\r\n",
+		robotName, outPort, robotAddrPath);
 
-	//send http request
-	int totalBytes = 0;
-	int bytes;
-	do {
-		if ((bytes = send(sock, &request[totalBytes], strlen(request)-totalBytes, 0)) == -1) 
-			failProgram("Send failed. \n");
-		totalBytes += bytes;
-	} while (totalBytes < strlen(request));
+        //send http request
+        int bytes;
+        bytes = send(sockTCP, request, strlen(request), 0);
 
-	//TODO process response
+        //process response
 
+        char buff[904];
+        memset(buff, 0, 904);
+        int check = recv(sockTCP, buff, 904, 0);
+        printf("Buff = %s\n", buff);
+        printf("Bytes read = %d\n", check);
+
+        char *response = strtok(buff, "\r\n");
+        response = strtok(NULL,"\r\n");
+        response = strtok(NULL, "\r\n");
+        response = strtok(NULL,"\r\n");
+        response = strtok(NULL, "\r\n");
+        response = strtok(NULL,"\r\n");
+        response = strtok(NULL,"\r\n");
+        response = strtok(NULL, "\r\n");
+
+        //printf("Response = %s\n", response);
+
+        char message[1000];
+        memset(message, 0, 1000);
+        memcpy(message, &ID, 32);
+        int one = 1;
+        memcpy(message+32, &one, 32);
+        memcpy(message+64, &one, 32);
+        memcpy(message+96, response, 904);
+
+	// TODO: send data back to client
 
 	//cleanups
+	free(recv_buffer);
 	free(request);
 	free(robotAddrPath);
 }
