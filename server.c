@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 			sendRobotRequest(roboID, 6, 0, imageID);
 		}
 //		printf("resetting buff\n");
-		memset(buff, 0, 500);\
+		memset(buff, 0, 500);
 	}
 	}
 //	printf("About to exit\n");
