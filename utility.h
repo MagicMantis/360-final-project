@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <unistd.h>
 
 // Print a message to stdout and exit the program.
 void failProgram(char* msg);

@@ -1,12 +1,10 @@
 #include "udcp.h"
 
-int message_id = 0;
-
 //reliably send a message to the server
 int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsigned int id) {
-
 	Response *temp = malloc(sizeof(Response));
 	char *data = (char *) buffer;
+	int sentLen = 0;
 	int msgs_needed = 0;
 	int temp_size = size;
 	int dataSection = 0;
@@ -23,7 +21,7 @@ int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsig
 		//format udcp header
 		temp->request_id = id;
 		temp->num_of_msgs = msgs_needed;
-		temp->sequence_num = i;		
+		temp->sequence_num = i;
 
 		//calc data size
 		dataSection = size;
@@ -35,10 +33,10 @@ int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsig
 		processed += dataSection;
 
 		//send data
-		int sentLen = sendto(sock, temp, 12+dataSection, 0, (struct sockaddr*) &info, sizeof(info));
+		sentLen = sendto(sock, temp, 12+dataSection, 0, (struct sockaddr*) &info, sizeof(info));
 		i++;
 	}
-
+	return sentLen;
 }
 
 //reliably receive a message from the server
@@ -56,7 +54,6 @@ int udcpRecv(int sock, void *buffer, unsigned int id) {
 		temp->data_size = bytes - (sizeof(unsigned int) * 3);
 	}
 
-	unsigned int recv_id = temp->request_id;
 	unsigned int num_msgs = temp->num_of_msgs;
 	unsigned int seq = temp->sequence_num;
 	memcpy(&msgs[seq], temp, sizeof(Response));

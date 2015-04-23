@@ -1,6 +1,6 @@
 #include "utility.h"
 #include "udcp.h"
-#include <unistd.h>
+#include "robot.h"
 
 int main(int argc, char *argv[]) {
 
@@ -30,6 +30,8 @@ int main(int argc, char *argv[]) {
 
 	printf("server = %s\nport = %d\nrobotID = %s\nlength = %d\nN = %d\n", server, port, robotID, length, N);
 
+//replaced by action loop
+/*
 	char request[500];
 	memset(request, 0, 500);
 	messageNum = htonl(messageNum);
@@ -43,6 +45,8 @@ int main(int argc, char *argv[]) {
 	requestPoint += sizeof(robotID);
 	memcpy(requestPoint, image, strlen(image));
 	printf("command = %s\n", requestPoint);
+*/
+
 
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Can't set up socket\n");
@@ -57,7 +61,10 @@ int main(int argc, char *argv[]) {
 		servAddr.sin_addr.s_addr = *((unsigned long *) thehost->h_addr_list[0]);
 	}
 
-	int sentLen = sendto(sock, request, 500, 0, (struct sockaddr *) &servAddr, sizeof(servAddr));
+	actionLoop(sock, (struct sockaddr *) &servAddr, length, N, robotID);
+
+//replaced by action loop
+/*	int sentLen = sendto(sock, request, 500, 0, (struct sockaddr *) &servAddr, sizeof(servAddr));
 	printf("SentLen = %d\n", sentLen);
 
 	alarm(5);
@@ -79,6 +86,7 @@ int main(int argc, char *argv[]) {
 	fwrite(buff, 1, response_size, fp);
 	fclose(fp);
 	free(buff);
+*/
 
 	exit(0);
 }
