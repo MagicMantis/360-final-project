@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-	
+
 	char *image = "GET IMAGE";
 	char *gps = "GET GPS";
 	char *dgps = "GET DGPS";
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 	requestPoint += sizeof(robotID);
 	memcpy(requestPoint, image, strlen(image));
 	printf("command = %s\n", requestPoint);
-	
+
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Can't set up socket\n");
 

@@ -15,9 +15,8 @@ typedef struct Response_t {
 } Response;
 
 typedef struct Request_t {
-	unsigned int robot_id;
 	unsigned int request_id;
-	char request[16];
+	char data[32];
 } Request;
 
 extern int message_id;
