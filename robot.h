@@ -33,7 +33,7 @@ void getLasers(FILE *out, char *robot_id);
 void move(int speed, char *robot_id);
 
 //turn the robot by given degrees
-void turn(int degrees, char *robot_id);
+void turn(double degrees, char *robot_id);
 
 //stop the robot by setting its speed to 0
 void stop(char *robot_id);

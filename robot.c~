@@ -17,8 +17,8 @@ void actionLoop(int s, struct sockaddr *addr, int length, int sides, char *robot
 	//calculate moves/degrees
 	int state1moves = sides;
 	int state2moves = sides-1;
-	int state1degrees = 360/state1moves;
-	int state2degrees = 360/state2moves;
+	double state1rad = (2/state1moves)*M_PI;
+	double state2rad = (2/state2moves)*M_PI;
 
 	//initial data snapshot
 	getInfo(robot_id);
@@ -27,24 +27,42 @@ void actionLoop(int s, struct sockaddr *addr, int length, int sides, char *robot
 	//action loop
 	int i;
 	for (i = 0; i < state1moves; i++) {
+		alarm(5);
 		move(1, robot_id);
-		//TODO: wait for move to finish
+		alarm(0);
 		sleep(length);
+		alarm(5);
 		stop(robot_id);
+		alarm(0);
+		alarm(5);
 		getInfo(robot_id);
-		turn(state1degrees, robot_id);
+		alarm(0);
+		alarm(5);
+		turn(state1rad, robot_id);
+		alarm(0);
+		alarm(5);
 		stop(robot_id);
+		alarm(0);
 		step_num++;
 	}
 	//second polygon
 	for (i = 0; i < state2moves; i++) {
+		alarm(5);
 		move(1, robot_id);
-		//TODO: wait for move to finish
+		alarm(0);
 		sleep(length);
+		alarm(5);
 		stop(robot_id);
+		alarm(0);
+		alarm(5);
 		getInfo(robot_id);
-		turn(-state2degrees, robot_id);
+		alarm(0);
+		alarm(5);
+		turn(-state2rad, robot_id);
+		alarm(0);
+		alarm(5);
 		stop(robot_id);
+		alarm(0);
 		step_num++;
 	}
 }
@@ -73,6 +91,7 @@ void getInfo(char *robot_id) {
 
 //request an image from the server
 void getImage(char *robot_id) {
+	printf("\nGet Image\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
@@ -81,11 +100,12 @@ void getImage(char *robot_id) {
 	int success = 0;
 	while (!success) {
 		//send request
-		int sendLen = sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
+		sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
 
 		//recieve response
 		const unsigned int buffer_size = 100 * 1000;
 		char* buff = (char*) malloc(buffer_size * sizeof(char));
+		memset(buff, 0, buffer_size);
 		int recvLen = udcpRecv(sock, buff, message_id);
 		if (recvLen == -1) continue;
 		success = 1;
@@ -105,6 +125,7 @@ void getImage(char *robot_id) {
 
 //get the GPS coordinates from the robot
 void getTextData(FILE *out, char *command, char *str, char *robot_id) {
+	printf("\nGet Text\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
@@ -114,11 +135,12 @@ void getTextData(FILE *out, char *command, char *str, char *robot_id) {
 	int success = 0;
 	while (!success) {
 		//send request
-		int sendLen = sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
+		sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
 
 		//recieve response
 		const unsigned int buffer_size = 3 * 1000;
 		char* buff = (char *) malloc(buffer_size * sizeof(char));
+		memset(buff, 0, buffer_size);
 		int recvLen = udcpRecv(sock, buff, message_id);
 		if (recvLen == -1) continue;
 		success = 1;
@@ -134,7 +156,7 @@ void getTextData(FILE *out, char *command, char *str, char *robot_id) {
 
 //move the robot in current direction at given speed
 void move(int speed, char *robot_id) {
-	
+	printf("\nMOVE\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
@@ -146,11 +168,12 @@ void move(int speed, char *robot_id) {
 	int success = 0;
 	while (!success) {
 		//send request
-		int sendLen = sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
+		sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
 
 		//recieve response
-		const unsigned int buffer_size = 3 * 1000;
+		const unsigned int buffer_size = 10 * 1000;
 		char* buff = (char *) malloc(buffer_size * sizeof(char));
+		memset(buff, 0, buffer_size);
 		int recvLen = udcpRecv(sock, buff, message_id);
 		if (recvLen == -1) continue;
 		success = 1;
@@ -163,14 +186,14 @@ void move(int speed, char *robot_id) {
 }
 
 //turn the robot by given degrees
-void turn(int degrees, char *robot_id) {
-
+void turn(double degrees, char *robot_id) {
+	printf("\nTURN\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
 	strcpy(&(request->data[strlen(robot_id)+1]), "TURN ");
 	char deg[4];
-	sprintf(deg, "%d", degrees);
+	sprintf(deg, "%lf", degrees);
 	strcpy(&(request->data[strlen(robot_id)+6]), deg);
 
 	int success = 0;
@@ -179,8 +202,9 @@ void turn(int degrees, char *robot_id) {
 		sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
 
 		//recieve response
-		const unsigned int buffer_size = 3 * 1000;
+		const unsigned int buffer_size = 10 * 1000;
 		char* buff = (char *) malloc(buffer_size * sizeof(char));
+		memset(buff, 0, buffer_size);
 		int recvLen = udcpRecv(sock, buff, message_id);
 		if (recvLen == -1) continue;
 		success = 1;
@@ -193,6 +217,7 @@ void turn(int degrees, char *robot_id) {
 
 //stop the robot by setting its speed to 0
 void stop(char *robot_id) {
+	printf("\nSTOP\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
@@ -201,11 +226,12 @@ void stop(char *robot_id) {
 	int success = 0;
 	while (!success) {
 		//send request
-		int sendLen = sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
+		sendto(sock, request, sizeof(Request), 0, servAddr, sizeof(*servAddr));
 
 		//recieve response
 		const unsigned int buffer_size = 3 * 1000;
 		char* buff = (char *) malloc(buffer_size * sizeof(char));
+		memset(buff, 0, buffer_size);
 		int recvLen = udcpRecv(sock, buff, message_id);
 		if (recvLen == -1) continue;
 		success = 1;
