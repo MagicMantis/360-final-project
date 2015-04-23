@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
 	cliAddrLen = sizeof(clntAddr);
 
-	for(;;){	
+	for(;;){
 		messageLength = recvfrom(sockUDP, buff, sizeof(buff), 0, (struct sockaddr *) &clntAddr, &cliAddrLen);
 		if(messageLength == -1){
 			printf("recvfrom failed\n");
@@ -62,8 +62,8 @@ int main(int argc, char *argv[]) {
 		memset(command, 0, 11);
 		memcpy(command, buff+4+strlen(roboID)+1, 11);
 		printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
-		
-		if(strcmp(robotID, roboID) == 0){		
+
+		if(strcmp(robotID, roboID) == 0){
 		char *order = strtok(command, " ");
 		if(strcmp(order,"GET") == 0){
 			order = strtok(NULL," ");
@@ -94,8 +94,8 @@ int main(int argc, char *argv[]) {
 			sendRobotRequest(roboID, 6, 0, imageID);
 		}
 //		printf("resetting buff\n");
-		memset(buff, 0, 500);\
-	}		
+		memset(buff, 0, 500);
+	}
 	}
 //	printf("About to exit\n");
 	exit(0);
@@ -149,16 +149,16 @@ void sendRobotRequest(char* robotID, int request_no, int speed, char *imageID) {
 	//set up accepted addresses
 	struct sockaddr_in robotAddr;
 	memset(&robotAddr, 0, sizeof(struct sockaddr));
-	robotAddr.sin_family = AF_INET; 
-	robotAddr.sin_addr.s_addr = *((unsigned long *)server->h_addr_list[0]); 
-	robotAddr.sin_port = htons(outPort); 
+	robotAddr.sin_family = AF_INET;
+	robotAddr.sin_addr.s_addr = *((unsigned long *)server->h_addr_list[0]);
+	robotAddr.sin_port = htons(outPort);
 
-	
+
 //	printf("got past weird shit\n");
 
 	//create socket
 	int sockTCP;
-	if ((sockTCP = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) 
+	if ((sockTCP = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 		printf("Failed to create socket. \n");
 
 	//establish connection
@@ -177,7 +177,7 @@ void sendRobotRequest(char* robotID, int request_no, int speed, char *imageID) {
 	int bytes;
 	bytes = send(sockTCP, request, strlen(request), 0);
 	printf("TCP bytes sent = %d\n", bytes);
-     	
+
 	// use a large buffer for possibly receiving an image
 	const unsigned int buffer_size = 100 * 1000;
 	char* buff = (char*) malloc(buffer_size * sizeof(char));
@@ -192,7 +192,7 @@ void sendRobotRequest(char* robotID, int request_no, int speed, char *imageID) {
 	    }
 	    totalBytes += bytes;
 	} while(bytes > 0);
-	
+
 	printf("Buff = %s\n", buff);
 	printf("Bytes read = %d\n", totalBytes);
 
@@ -208,11 +208,11 @@ void sendRobotRequest(char* robotID, int request_no, int speed, char *imageID) {
 
 	// send response
 	udcpSend(sockUDP, clntAddr, (void *) response_data, content_length, ID);
-	
+
 	//cleanups
 	free(buff);
 	free(request);
 	free(robotAddrPath);
 //	printf("Finishing sendRobotCommand. Returning\n");
-	
+
 }

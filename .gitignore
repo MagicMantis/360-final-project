@@ -1,3 +1,8 @@
 *.o
 client
 server
+*.jpeg
+*.jpg
+*.out
+*.txt
+*.png
