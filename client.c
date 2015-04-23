@@ -1,5 +1,6 @@
 #include "utility.h"
 #include "udcp.h"
+#include <unistd.h>
 
 int main(int argc, char *argv[]) {
 	
@@ -31,6 +32,7 @@ int main(int argc, char *argv[]) {
 
 	char request[500];
 	memset(request, 0, 500);
+	messageNum = htonl(messageNum);
 	memcpy(request, &messageNum, 4);
 	char *requestPoint = request;
 	requestPoint+=4;
@@ -58,6 +60,8 @@ int main(int argc, char *argv[]) {
 	int sentLen = sendto(sock, request, 500, 0, (struct sockaddr *) &servAddr, sizeof(servAddr));
 	printf("SentLen = %d\n", sentLen);
 
+	alarm(5);
+
 //	unsigned int test;
 //	memcpy(&test, request, 32);
 //	printf("ID sent = %d\n", test);
@@ -66,12 +70,14 @@ int main(int argc, char *argv[]) {
 	char* buff = (char*) malloc(buffer_size * sizeof(char));
 	int response_size = udcpRecv(sock, buff, messageNum);
 
+	alarm(0);
+
 	printf("response: %d\n", response_size);
 
 	FILE *fp;
 	fp = fopen("file.jpeg", "w");
 	fwrite(buff, 1, response_size, fp);
-	close(fp);
+	fclose(fp);
 	free(buff);
 
 	exit(0);

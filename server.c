@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
 		printf("Got a message\n");
 		memset(&ID, 0, 4);
 		memcpy(&ID, buff, 4);
+		ID = ntohl(ID);
 		char roboID[strlen(robotID)];
 		memcpy(roboID, buff+4, strlen(robotID));
 		char command[11];
@@ -62,6 +63,7 @@ int main(int argc, char *argv[]) {
 		memcpy(command, buff+4+strlen(roboID)+1, 11);
 		printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
 		
+		if(strcmp(robotID, roboID) == 0){		
 		char *order = strtok(command, " ");
 		if(strcmp(order,"GET") == 0){
 			order = strtok(NULL," ");
@@ -92,7 +94,8 @@ int main(int argc, char *argv[]) {
 			sendRobotRequest(roboID, 6, 0, imageID);
 		}
 //		printf("resetting buff\n");
-		memset(buff, 0, 500);		
+		memset(buff, 0, 500);\
+	}		
 	}
 //	printf("About to exit\n");
 	exit(0);
