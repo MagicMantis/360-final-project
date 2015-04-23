@@ -24,10 +24,7 @@ void getInfo(char *robot_id);
 void getImage(char *robot_id);
 
 //get the GPS coordinates from the robot
-void getGPS(FILE *out, char *robot_id);
-
-//get the dGPS coordinates (relative to another point) from the robot
-void getDGPS(FILE *out, char *robot_id);
+void getTextData(FILE *out, char *command, char *str, char *robot_id);
 
 //get the laser information from the robot
 void getLasers(FILE *out, char *robot_id);

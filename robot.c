@@ -56,9 +56,11 @@ void getInfo(char *robot_id) {
 	fp = fopen(filename, "w");
 
 	//get text info
-	getGPS(fp, robot_id);
-	getDGPS(fp, robot_id);
-	getLasers(fp, robot_id);
+	getTextData(fp, "GPS", "GPS", robot_id);
+	getTextData(fp, "DGPS", "dGPS", robot_id);
+
+//	lasers are messed up right now
+//	getTextData(fp, "LASERS", "lasers", robot_id);
 
 	//get and save image
 	getImage(robot_id);
@@ -100,11 +102,12 @@ void getImage(char *robot_id) {
 }
 
 //get the GPS coordinates from the robot
-void getGPS(FILE *out, char *robot_id) {
+void getTextData(FILE *out, char *command, char *str, char *robot_id) {
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
-	strcpy(&(request->data[strlen(robot_id)+1]), "GET GPS");
+	strcpy(&(request->data[strlen(robot_id)+1]), "GET ");
+	strcpy(&(request->data[strlen(robot_id)+5]), command);
 
 	int success = 0;
 	while (!success) {
@@ -119,8 +122,8 @@ void getGPS(FILE *out, char *robot_id) {
 		success = 1;
 
 		//save results
-		fprintf(stdout, "GPS %s\n", buff);
-		fprintf(out, "GPS %s\n", buff);
+		if (strcmp(command, "GPS") == 0) fprintf(stdout, "%s %s\n", str, buff);
+		fprintf(out, "%s %s\n", str, buff);
 		free(buff);
 	}
 

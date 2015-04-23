@@ -15,8 +15,7 @@ Camera ID: `19`
 To-Do List
 ----------
 - Implement robot functions (robot.c's functions)
-	- dGPS (Joseph will handle)
-	- lasers (Joseph will handle)
+	- lasers (currently broken for unknown reason)
 	- move
 	- turn
 	- stop
