@@ -151,7 +151,7 @@ void getTextData(FILE *out, char *command, char *str, char *robot_id) {
 		success = 1;
 
 		//save results
-		if (strcmp(command, "GPS") == 0) fprintf(stdout, "%s %s\n", str, buff);
+		if (strcmp(command, "LASERS") != 0) fprintf(stdout, "%s %s\n", str, buff);
 		fprintf(out, "%s %s\n", str, buff);
 		free(buff);
 	}
