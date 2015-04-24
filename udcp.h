@@ -19,7 +19,6 @@ typedef struct Request_t {
 	char data[32];
 } Request;
 
-extern int message_id;
 
 //reliably send a message to the server
 int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsigned int id);
