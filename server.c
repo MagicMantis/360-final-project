@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 	robotName = argv[2];
 	char *robotID = argv[3];
 	char *imageID = argv[4];
-	char buff[500];
+	char buff[1000];
 
 	if((sockUDP = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Error with setting up socket\n");
