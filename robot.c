@@ -45,15 +45,13 @@ void actionLoop(int s, struct sockaddr *addr, int length, int sides, char *robot
 		alarm(0);
 		sleep(sleepSec);
 		usleep(state1rad);
-		printf("seconds = %lf\n", state1rad);
 		alarm(5);
 		stop(robot_id);
 		alarm(0);
 		step_num++;
-		printf("\n\n");
 	}
 	//second polygon
-/*	for (i = 0; i < state2moves; i++) {
+	for (i = 0; i < state2moves; i++) {
 		alarm(5);
 		move(1, robot_id);
 		alarm(0);
@@ -67,13 +65,13 @@ void actionLoop(int s, struct sockaddr *addr, int length, int sides, char *robot
 		alarm(5);
 		turn(1, robot_id);
 		alarm(0);
+		sleep(sleepSec2);
 		usleep(state2rad);
 		alarm(5);
 		stop(robot_id);
 		alarm(0);
 		step_num++;
-		printf("\n\n");
-	}*/
+	}
 }
 
 //take data snapshot
@@ -100,7 +98,6 @@ void getInfo(char *robot_id) {
 
 //request an image from the server
 void getImage(char *robot_id) {
-	printf("Get Image\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
@@ -134,7 +131,6 @@ void getImage(char *robot_id) {
 
 //get the GPS coordinates from the robot
 void getTextData(FILE *out, char *command, char *str, char *robot_id) {
-	printf("Get Text\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
@@ -165,7 +161,6 @@ void getTextData(FILE *out, char *command, char *str, char *robot_id) {
 
 //move the robot in current direction at given speed
 void move(int speed, char *robot_id) {
-	printf("MOVE\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
@@ -196,7 +191,6 @@ void move(int speed, char *robot_id) {
 
 //turn the robot by given degrees
 void turn(double degrees, char *robot_id) {
-	printf("TURN\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);
@@ -226,7 +220,6 @@ void turn(double degrees, char *robot_id) {
 
 //stop the robot by setting its speed to 0
 void stop(char *robot_id) {
-	printf("STOP\n");
 	Request *request = (Request *) malloc(sizeof(Request));
 	request->request_id = htonl(message_id);
 	strcpy(request->data, robot_id);

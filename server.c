@@ -90,11 +90,9 @@ int main(int argc, char *argv[]) {
 		else{
 			sendRobotRequest(roboID, 6, 0, imageID);
 		}
-//		printf("resetting buff\n");
 		memset(buff, 0, 500);
 	}
 	}
-//	printf("About to exit\n");
 	exit(0);
 }
 
@@ -167,30 +165,23 @@ void sendRobotRequest(char* robotID, int request_no, int speed, char *imageID) {
 	sprintf(request, "GET %s HTTP/1.1\r\nHost: castara.clemson.edu\r\nConnection: close\r\n\r\n",
 		robotAddrPath);
 
-	printf("%s\n", robotAddrPath);
-//	printf("%s\n", request);
 
 	//send http request
 	int bytes;
 	bytes = send(sockTCP, request, strlen(request), 0);
-//	printf("TCP bytes sent = %d\n", bytes);
 
 	// use a large buffer for possibly receiving an image
 	const unsigned int buffer_size = 100 * 1000;
 	char* buff = (char*) malloc(buffer_size * sizeof(char));
 	int totalBytes = 0;
 	do {
-	    printf("receiving data...\n");
 	    bytes = recv(sockTCP, buff + totalBytes, buffer_size - totalBytes, 0);
-	    printf("received %i bytes\n", bytes);
 	    if(bytes == -1) {
 		printf("An error occurred while receiving response from robot.\n");
 	    }
 	    totalBytes += bytes;
 	} while(bytes > 0);
 
-//	printf("Buff = %s\n", buff);
-//	printf("Bytes read = %d\n", totalBytes);
 
 	// get size of response data
 	char *response_data = strstr(buff, "\r\n\r\n") + 4;
@@ -200,7 +191,6 @@ void sendRobotRequest(char* robotID, int request_no, int speed, char *imageID) {
 	    i++;
 	    content_length--;
 	}
-//	printf("Content length is %u.\n", content_length);
 
 	// send response
 	udcpSend(sockUDP, clntAddr, (void *) response_data, content_length, ID);
@@ -209,6 +199,5 @@ void sendRobotRequest(char* robotID, int request_no, int speed, char *imageID) {
 	free(buff);
 	free(request);
 	free(robotAddrPath);
-//	printf("Finishing sendRobotCommand. Returning\n");
 
 }

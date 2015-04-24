@@ -17,7 +17,6 @@ int main(int argc, char *argv[]) {
 	int length = atoi(argv[4]);
 	int N = atoi(argv[5]);
 
-	printf("server = %s\nport = %d\nrobotID = %s\nlength = %d\nN = %d\n", server, port, robotID, length, N);
 
 	if((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		printf("Can't set up socket\n");

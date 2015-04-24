@@ -17,9 +17,7 @@ int udcpSend(int sock, struct sockaddr_in info, void *buffer, size_t size, unsig
 
 	int i = 0, processed = 0;
 	while (i < msgs_needed) {
-//	    printf("anything\n");
 		//format udcp header
-//		printf("Messages needed = %d\nseqnum = %d\n", msgs_needed, htonl(i));
 		temp->request_id = id;
 		temp->num_of_msgs = htonl(msgs_needed);
 		temp->sequence_num = htonl(i);		
@@ -60,7 +58,6 @@ int udcpRecv(int sock, void *buffer, unsigned int id) {
 
 	num_msgs = ntohl(num_msgs);
 	seq = ntohl(seq);
-//	printf("num_msgs = %d\nseq = %d\n", num_msgs, seq);
 
 	memcpy(&msgs[seq], temp, sizeof(Response));
 	int i = 1;
