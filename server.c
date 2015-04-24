@@ -51,8 +51,6 @@ int main(int argc, char *argv[]) {
 			printf("recvfrom failed\n");
 			exit(0);
 		}
-//		printf("Message Length = %d\n", messageLength);
-//		printf("Got a message\n");
 		memset(&ID, 0, 4);
 		memcpy(&ID, buff, 4);
 		ID = ntohl(ID);
@@ -61,7 +59,6 @@ int main(int argc, char *argv[]) {
 		char command[11];
 		memset(command, 0, 11);
 		memcpy(command, buff+4+strlen(roboID)+1, 11);
-		printf("ID = %d\nrobotID = %s\ncommand = %s\n", ID, robotID, command);
 
 		if(strcmp(robotID, roboID) == 0){
 		char *order = strtok(command, " ");

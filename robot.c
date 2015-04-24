@@ -17,9 +17,12 @@ void actionLoop(int s, struct sockaddr *addr, int length, int sides, char *robot
 	//calculate moves/degrees
 	int state1moves = sides;
 	int state2moves = sides-1;
-	double state1rad = (2.0/(double)state1moves)*M_PI;
-	double state2rad = (2.0/(double)state2moves)*M_PI;
-
+	double state1rad = (3.0/(double)state1moves)*M_PI*1000000.0;
+	double state2rad = (3.0/(double)state2moves)*M_PI*1000000.0;
+	int sleepSec = (int)(state1rad/1000000);
+	int sleepSec2 = (int)(state2rad/1000000);
+	state1rad = ((int)state1rad%1000000);
+	state2rad = ((int)state2rad%1000000);
 	//initial data snapshot
 	getInfo(robot_id);
 	step_num++;
@@ -40,7 +43,9 @@ void actionLoop(int s, struct sockaddr *addr, int length, int sides, char *robot
 		alarm(5);
 		turn(1, robot_id);
 		alarm(0);
-		sleep(state1rad);
+		sleep(sleepSec);
+		usleep(state1rad);
+		printf("seconds = %lf\n", state1rad);
 		alarm(5);
 		stop(robot_id);
 		alarm(0);
@@ -48,7 +53,7 @@ void actionLoop(int s, struct sockaddr *addr, int length, int sides, char *robot
 		printf("\n\n");
 	}
 	//second polygon
-	for (i = 0; i < state2moves; i++) {
+/*	for (i = 0; i < state2moves; i++) {
 		alarm(5);
 		move(1, robot_id);
 		alarm(0);
@@ -62,13 +67,13 @@ void actionLoop(int s, struct sockaddr *addr, int length, int sides, char *robot
 		alarm(5);
 		turn(1, robot_id);
 		alarm(0);
-		sleep(state2rad);
+		usleep(state2rad);
 		alarm(5);
 		stop(robot_id);
 		alarm(0);
 		step_num++;
 		printf("\n\n");
-	}
+	}*/
 }
 
 //take data snapshot
