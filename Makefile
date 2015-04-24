@@ -4,10 +4,10 @@ CFLAGS=-Wall -g -lm
 all: client server
 
 client: client.o utility.o robot.o udcp.o
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o robotClient
 
 server: server.o utility.o udcp.o
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o robotServer
 
 client.o: utility.h
 server.o: utility.h

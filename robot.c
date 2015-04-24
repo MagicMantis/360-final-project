@@ -2,7 +2,7 @@
 #include "udcp.h"
 #include "robot.h"
 
-int message_id = 0;
+unsigned int message_id = 0;
 int step_num = 0;
 
 struct sockaddr *servAddr;
